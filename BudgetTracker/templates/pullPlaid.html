@@ -1,0 +1,180 @@
+{% extends 'base.html'%}
+{% load static %}
+{% load templateFilters%}
+{% block pullPlaid %}
+
+<div class="container">
+    {% comment %} <form method="GET" action="../ajax/connectToLink">
+        <button id="link-btn" type="submit"> Connect to Plaid </button>
+       
+    </form> {% endcomment %}
+
+    <button id="link-btn" class="btn btn-primary" type="button"> Connect to Plaid </button>
+
+    <div id="app">
+        <div class="box">
+            <button id="get-accounts-btn" class="btn btn-primary">Get Accounts</button>
+            <div id="get-accounts-data"></div>
+        </div>
+
+        <div class="box">
+            <button id="get-item-btn" class="btn btn-primary">Get Item</button>
+            <div id="upgrade-to-connect-data" class="inner"></div>
+        </div>
+
+        <div class="box" id="txnBox">
+            <button id="get-transaction-data" class="btn btn-primary">Get Transactions</button>
+            <div id="get-transactions-data"></div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+{% csrf_token %}
+
+<script type="text/javascript">
+
+    //----Github Django Demo Repo Code---
+
+    var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    };
+        
+    function token()
+    {
+        var result = $.ajax(
+            {                       // initialize an AJAX request
+                url: '../create_link_token/',                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+                data: {},
+                type: "POST",
+                async: false,
+                success: function (data) 
+                {   
+                    return data.link_token;
+                },
+                error: function (data)
+                {
+                    console.log(data);
+                    return "";
+                }
+            });
+        
+        return result;
+    };
+
+    linkToken = token();
+    console.log(linkToken.responseJSON['link_token']);
+        
+    var handler = Plaid.create({
+        apiVersion: 'v2',
+        clientName: 'Plaid Walkthrough Demo',
+        env: '{{ plaid_environment }}',
+        product: ['transactions, auth'],
+        token: linkToken.responseJSON['link_token'],
+        onSuccess: function(public_token) {
+            $.post('/get_access_token', {public_token: public_token}, function() {
+                $('#container').fadeOut('fast', function() {
+                    $('#intro').hide();
+                    $('#app, #steps').fadeIn('slow');
+                });
+            });
+        },
+    });
+    
+    $('#link-btn').on('click', function(e) {
+        
+        handler.open();
+    });
+
+    var accessToken =  getParameterByName('access_token');
+    if (accessToken != null) {
+        $.post('/set_access_token', {access_token: accessToken}, function() {
+            $('#container').fadeOut('fast', function() {
+                $('#intro').hide();
+                $('#app, #steps').fadeIn('slow');
+            });
+        });
+    }
+
+    $('#get-accounts-btn').on('click', function(e) {
+        $.get('/accounts', function(data) {
+            $('#get-accounts-data').slideUp(function() {
+                var html = '';
+                data.accounts.forEach(function(account, idx) {
+                    html += '<div class="inner">';
+                    html += '<strong>' + account.name +
+                            ' $' + (account.balances.available != null ? account.balances.available : account.balances.current) + '</strong><br>';
+                    html += account.subtype + ' ' + account.mask;
+                    html += '</div>';
+                });
+
+                $(this).html(html).slideDown();
+            });
+        });
+    });
+
+    $('#get-item-btn').on('click', function(e) {
+        $.post('/item', function(data) {
+            $('#upgrade-to-connect-data').slideUp(function() {
+                if(data.error)
+                    $(this).html('<p>' + data.error + '</p>').slideDown();
+                else {
+                    var html = '';
+                    html += '<p>Here\'s some basic information about your Item:</p>';
+                    html += '<p>Institution name:' + data.institution.name +'</p>';
+                    html += '<p>Billed products: ' + data.item.billed_products.join(', ') + '</p>';
+                    html += '<p>Available products: ' + data.item.available_products.join(', ') + '</p>';
+
+
+                    $(this).html(html).slideDown();
+                    $('#txnBox').slideDown();
+                }
+            });
+        });
+    });
+
+    $('#get-transaction-data').on('click', function(e) {
+        $.post('/transactions', function(data) {
+            if (data.error) {
+                $(this).html('<p>' + data.error + '</p>').slideDown();
+            } else {
+            $('#get-transactions-data').slideUp(function() {
+                var html = '<p>Pulled ' + data.transactions.length + ' transaction(s).</p>';
+                data.transactions.forEach(function(txn, idx) {
+                    html += '<div class="inner">';
+                    html += '<strong>' + txn.name + '</strong><br>';
+                    html += '$' + txn.amount;
+                    html += '<br><em>' + txn.date + '</em>';
+                    html += '</div>';
+                });
+
+                $(this).slideUp(function() {
+                    $(this).html(html).slideDown();
+                });
+            });
+            }
+        });
+    });
+
+</script>
+
+{% endblock %}

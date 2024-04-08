@@ -1,0 +1,93 @@
+{% extends 'base.html'%}
+{% load static %}
+{% block importTx %}
+    <div class = "container">
+        
+        <h1>Add stuff:</h1>
+        
+        {% if addAction %}
+            <h4> {{ addAction }}</h4>
+        {% endif %}
+        <div>
+            <h3>Add Account: </h3>
+            <form method="GET">
+                <input type="text" id="addAccount" name="addAccount">
+                <button type="submit">Add Account</button>
+            </form>
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapse_accounts" aria-expanded="false" aria-controls="collapse_accounts">
+                Show accounts
+            </button>
+            <div class="collapse" id="collapse_accounts">
+                <ul>
+                {% for acc in existingAccounts %}
+                    <li>{{ acc.name }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div>
+            <h3>Add theme:</h3>
+            <form method="GET">
+                <input type="text" id="addTheme" name="addTheme">
+                <button type="submit">Add Theme</button>
+            </form>
+        </div>
+        <div>
+            <h3>Add category:</h3>
+            <form method="GET">
+                <select name="existingTheme" id="existingTheme">
+                {% for theme in existingThemes %}
+                    <option value="{{ theme.name }}">{{ theme.name }}</option>    
+                {% endfor %}
+                </select>
+                <input type="text" id="addCategory" name="addCategory">
+                <button type="submit">Add Category</button>
+            </form>
+        </div>
+        <br>
+        <div> 
+            <form method="GET">
+                <input type="hidden" id="loadOldTx" name="loadOldTx">
+                <button type="submit" disabled>Load Old Transactions</button>
+            </form>
+            <form method="GET">
+                <input type="hidden" id="loadNewTx" name="loadNewTx">
+                <button type="submit">Load New Transactions</button>
+            </form>
+            {% comment %} <form method="GET">
+                <input type="hidden" id="deleteAllTx" name="deleteAllTx">
+                <button type="submit">Delete All Transactions</button>
+            </form> {% endcomment %}
+        </div>
+        <br>
+        <div> 
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapse_themecats" aria-expanded="false" aria-controls="collapse_themecats">
+                Show Themes and Categories
+            </button>
+            <div class="collapse" id="collapse_themecats">
+                {% for theme in existingThemes %}
+                <button class="btn btn-primary theme-collapse-btn" type="button" data-toggle="collapse" data-target="#collapse_{{theme.id}}_theme" aria-expanded="false" aria-controls="collapse_{{theme.id}}_theme">
+                    {{theme.name}}
+                </button>
+                <div class="collapse" id="collapse_{{theme.id}}_theme">
+                    <ul>
+                        {% for cat in existingCategories %}
+                            {% if cat.theme.name == theme.name %}
+                                <li>{{ cat.theme.name }} - {{cat.name}}  <button class="icon_button delete_category" id="{{cat.id}}">X</button></li>    
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+            
+        </div>
+        <div class="container">
+            {% for tri in trips %}
+            <div>{{tri.name}}</div>
+            {% endfor %}
+        </div>
+        
+
+    </div>
+{% endblock %}

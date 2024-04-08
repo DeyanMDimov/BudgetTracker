@@ -1,0 +1,161 @@
+{% extends 'base.html'%}
+{% load static %}
+{% load templateFilters%}
+{% block viewSummary %}
+    <div class = "container">
+        
+        <div>
+            <h2>
+                View Summary - {{yearSelected}}
+            </h2>
+        </div>
+        <form method="GET">
+            <select id="yearSummary" name="yearSummary">
+                <option id="2024" name="2024">2024</option>
+                <option id="2023" name="2023">2023</option>
+                <option id="2022" name="2022">2022</option>
+                <option id="2021" name="2021">2021</option>
+                <option id="2020" name="2020">2020</option>
+                <option id="2019" name="2019">2019</option>
+                <option id="2018" name="2018">2018</option>
+                <option id="2017" name="2017">2017</option>
+                <option id="2016" name="2016">2016</option>
+                <option id="2015" name="2015">2015</option>
+                <option id="2014" name="2014">2014</option>
+            </select>
+            <button type="submit">Load</button>
+        </form>
+        <table class="summary_table striped-table shadow-sm rounded">
+            <thead class="sticky-top">
+                <tr>
+                    <td class="summary_table_theme">
+                        Theme
+                    </td>
+                    <td class="summary_table_category">
+                        Category
+                    </td>
+                    <td class="summary_table_total">
+                        Total
+                    </td>
+                    <td class="summary_table_jan">
+                        January
+                    </td>
+                    <td class="summary_table_feb">
+                        February
+                    </td>
+                    <td class="summary_table_mar">
+                        March
+                    </td>
+                    <td class="summary_table_apr">
+                        April
+                    </td>
+                    <td class="summary_table_may">
+                        May
+                    </td>
+                    <td class="summary_table_jun">
+                        June
+                    </td>
+                    <td class="summary_table_jul">
+                        July
+                    </td>
+                    <td class="summary_table_aug">
+                        August
+                    </td>
+                    <td class="summary_table_sep">
+                        September
+                    </td>
+                    <td class="summary_table_oct">
+                        October
+                    </td>
+                    <td class="summary_table_nov">
+                        November
+                    </td>
+                    <td class="summary_table_dec">
+                        December
+                    </td>
+                </tr>
+            </thead>
+            
+            {% for theme in existingThemes %}
+            {% if existingThemes|dict_key:theme|dict_key:'id' != 'overall'%}
+            <tbody class="summary_theme_tbody">
+               
+                <tr class="summary_theme_row">
+                    <!--
+                    <button class="btn btn-primary theme-collapse-btn" type="button" data-toggle="collapse" data-target="#collapse_{{theme.id}}_theme" aria-expanded="false" aria-controls="collapse_{{theme.id}}_theme">
+                        {{theme.name}}
+                    </button>
+                    <div class="collapse" id="collapse_{{theme.id}}_theme">
+                    -->
+                    <td class="summary_theme_cell">
+                        <button class="btn summary_theme_button" type="button" data-toggle="collapse" data-target="#theme_{{existingThemes|dict_key:theme|dict_key:'id'}}_rows" aria-expanded="false" aria-controls="#theme_{{existingThemes|dict_key:theme|dict_key:'id'}}_rows"> 
+                            {{theme}}
+                        </button> 
+                    </td>
+                    <td></td>
+                    <td class="summary_theme_total">{{existingThemes|dict_key:theme|dict_key:'total'}} </td>
+                    <td class="summary_theme_1">{{existingThemes|dict_key:theme|dict_key:1}} </td> 
+                    <td class="summary_theme_2">{{existingThemes|dict_key:theme|dict_key:2}} </td>
+                    <td class="summary_theme_3">{{existingThemes|dict_key:theme|dict_key:3}} </td>
+                    <td class="summary_theme_4">{{existingThemes|dict_key:theme|dict_key:4}} </td>
+                    <td class="summary_theme_5">{{existingThemes|dict_key:theme|dict_key:5}} </td>
+                    <td class="summary_theme_6">{{existingThemes|dict_key:theme|dict_key:6}} </td>
+                    <td class="summary_theme_7">{{existingThemes|dict_key:theme|dict_key:7}} </td>
+                    <td class="summary_theme_8">{{existingThemes|dict_key:theme|dict_key:8}} </td>
+                    <td class="summary_theme_9">{{existingThemes|dict_key:theme|dict_key:9}} </td>
+                    <td class="summary_theme_10">{{existingThemes|dict_key:theme|dict_key:10}} </td>
+                    <td class="summary_theme_11">{{existingThemes|dict_key:theme|dict_key:11}} </td>
+                    <td class="summary_theme_12">{{existingThemes|dict_key:theme|dict_key:12}} </td>
+                </tr>
+            </tbody>
+            <tbody class="collapse" id="theme_{{existingThemes|dict_key:theme|dict_key:'id'}}_rows">
+                    {% for category in categoryThemePairs %}
+                        {%if categoryThemePairs|dict_key:category == theme%}
+                <tr class="summary_category_row">
+                    <td></td>    
+                    <td class="summary_category_cell">{{category}}</td> 
+                    <td class="summary_theme_total">{{existingThemes|dict_key:theme|dict_key:category|dict_key:'total'}}</td>
+                    <td class="summary_theme_1">{{existingThemes|dict_key:theme|dict_key:category|dict_key:1}}</td> 
+                    <td class="summary_theme_2">{{existingThemes|dict_key:theme|dict_key:category|dict_key:2}}</td>
+                    <td class="summary_theme_3">{{existingThemes|dict_key:theme|dict_key:category|dict_key:3}}</td>
+                    <td class="summary_theme_4">{{existingThemes|dict_key:theme|dict_key:category|dict_key:4}}</td>
+                    <td class="summary_theme_5">{{existingThemes|dict_key:theme|dict_key:category|dict_key:5}}</td>
+                    <td class="summary_theme_6">{{existingThemes|dict_key:theme|dict_key:category|dict_key:6}}</td>
+                    <td class="summary_theme_7">{{existingThemes|dict_key:theme|dict_key:category|dict_key:7}}</td>
+                    <td class="summary_theme_8">{{existingThemes|dict_key:theme|dict_key:category|dict_key:8}}</td>
+                    <td class="summary_theme_9">{{existingThemes|dict_key:theme|dict_key:category|dict_key:9}}</td>
+                    <td class="summary_theme_10">{{existingThemes|dict_key:theme|dict_key:category|dict_key:10}}</td>
+                    <td class="summary_theme_11">{{existingThemes|dict_key:theme|dict_key:category|dict_key:11}}</td>
+                    <td class="summary_theme_12">{{existingThemes|dict_key:theme|dict_key:category|dict_key:12}}</td>
+                </tr>
+
+                        {% endif %}
+                    {% endfor %}
+            </tbody>
+                {%endif%}
+                {% endfor %}
+                
+            <tbody>
+                <tr class="summary_theme_row">
+                    <td class="summary_theme_cell"><div class="summary_theme_button">Overall Total</div></td> 
+                    <td></td>
+                    <td class="summary_theme_total">{{existingThemes|dict_key:'overall'|dict_key:'total'}}</td>
+                     <td class="summary_theme_1">{{existingThemes|dict_key:'overall'|dict_key:1}}</td>
+                    <td class="summary_theme_2">{{existingThemes|dict_key:'overall'|dict_key:2}}</td>
+                    <td class="summary_theme_3">{{existingThemes|dict_key:'overall'|dict_key:3}}</td>
+                    <td class="summary_theme_4">{{existingThemes|dict_key:'overall'|dict_key:4}}</td>
+                    <td class="summary_theme_5">{{existingThemes|dict_key:'overall'|dict_key:5}}</td>
+                    <td class="summary_theme_6">{{existingThemes|dict_key:'overall'|dict_key:6}}</td>
+                    <td class="summary_theme_7">{{existingThemes|dict_key:'overall'|dict_key:7}}</td>
+                    <td class="summary_theme_8">{{existingThemes|dict_key:'overall'|dict_key:8}}</td>
+                    <td class="summary_theme_9">{{existingThemes|dict_key:'overall'|dict_key:9}}</td>
+                    <td class="summary_theme_10">{{existingThemes|dict_key:'overall'|dict_key:10}}</td>
+                    <td class="summary_theme_11">{{existingThemes|dict_key:'overall'|dict_key:11}}</td>
+                    <td class="summary_theme_12">{{existingThemes|dict_key:'overall'|dict_key:12}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+    
+{% endblock %}

@@ -1,0 +1,1394 @@
+{% extends 'base.html'%}
+{% load static %}
+{% block equalPay %}
+    <div class = "container">
+        {% comment %} <div class="row">
+            <div class="col">
+                <h1>View Transactions</h1>
+            </div>
+        </div> {% endcomment %}
+        <div class="sticky-top pb-1" style="background-color: #121212;">
+            <div class="row">
+                <div class="col">
+                    <h4>Filters</h4>
+                </div>
+                <div class="col">
+                    <h4 class="text-right">{{tx_count}} Transactions</h4>
+                </div>
+            </div>
+            <div id="viewTx_filters">
+                <div class="dropdown">
+                    <button class="btn btn-dark date_filter" id="d_date_filter" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Date <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-filter" viewBox="0 1 16 16">
+                            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                          </svg> 
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="d_date_filter">
+                        <form method="GET">
+                            <div>
+                                <input type="date" id="date_filter_start" name="date_filter_start">
+                                <input type="date" id="date_filter_end" name="date_filter_end">
+                            </div>
+                            <button type="submit" id="date_filter_submit_btn">Submit</button><br>
+                        </form>
+                        <a id="date_filter_60_days" href="?daterange=180days">Last 180 days</a><br>
+                        <a id="date_filter_ytd" href="?daterange=YTD">YTD</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-dark desc_filter" id="d_desc_filter" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Description <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-filter" viewBox="0 1 16 16">
+                            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                          </svg>  
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="d_desc_filter">
+                        Filter by description.
+                        <input type="text" id="desc_filter_text">
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-dark type_filter" id="d_amount_filter" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Amount <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-filter" viewBox="0 1 16 16">
+                            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                          </svg>  
+                    </button>
+                    <div class="dropdown-menu checkbox-dropdown" aria-labelledby="d_amount_filter">
+                        &gt; <input type="text" id="gte_amount"> <br>
+                        &lt; <input type="text" id="lte_amount"> <br>
+                        = <input type="text" id="eq_amount">
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-dark type_filter" id="d_type_filter" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Type <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-filter" viewBox="0 1 16 16">
+                            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                          </svg>  
+                    </button>
+                    <div class="dropdown-menu checkbox-dropdown" aria-labelledby="d_type_filter">
+                        <input type="checkbox" class="filter_type_checkbox" name="credit" id="filter_type_credit" checked><label for="filter_type_credit">Credit</label><br>
+                        <input type="checkbox" class="filter_type_checkbox" name="debit" id="filter_type_debit" checked><label for="filter_type_debit">Debit</label>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-dark theme_filter" id="d_theme_filter" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Theme <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-filter" viewBox="0 1 16 16">
+                            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                          </svg>  
+                    </button>
+                    <div class="dropdown-menu checkbox-dropdown" aria-labelledby="d_theme_filter">
+                        <div class="checkbox-dropdown-long">
+                            {% for theme in themes %}
+                            <div class="filter_theme_entry">
+                                <input type="checkbox" name="{{theme.name}}" class="filter_theme_checkbox" id="filter_theme_{{theme.id}}" checked><label class="filter_theme_label" for="filter_theme_{{theme.id}}">{{theme.name}}</label><br>
+                            </div> 
+                            {%endfor%}
+                        </div>
+                        <button type="button" id="filter_select_all_theme">Select All</button><button type="button" id="filter_select_none_theme">Select None</button>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-dark cat_filter" id="d_cat_filter" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Category <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-filter" viewBox="0 1 16 16">
+                            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                          </svg>  
+                    </button>
+                    <div class="dropdown-menu checkbox-dropdown category-dropdown" aria-labelledby="d_cat_filter">
+                        <div class="checkbox-dropdown-long">
+                            {% for category in cats %}
+                            <div class="filter_cats_entry">
+                                <input type="checkbox" name="{{category.name}}" class="filter_cat_checkbox" id="filter_category_{{category.id}}" checked><label for="filter_category_{{category.id}}">{{category.name}}</label><br>
+                            </div>
+                            {%endfor%}
+                        </div>
+                        <button type="button" id="filter_select_all_cat">Select All</button><button type="button" id="filter_select_none_cat">Select None</button>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-dark label_filter" id="d_label_filter" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Label <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-filter" viewBox="0 1 16 16">
+                            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                          </svg>  
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="d_label_filter">
+                        <input type="text" id="label_filter_text">
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-dark notes_filter" id="d_notes_filter" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Notes <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-filter" viewBox="0 1 16 16">
+                            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                          </svg>  
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="d_notes_filter">
+                        <input type="text" id="notes_filter_text">
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-dark acct_filter" id="d_acct_filter" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Account <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-filter" viewBox="0 1 16 16">
+                            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                          </svg>  
+                    </button>
+                    <div class="dropdown-menu checkbox-dropdown" aria-labelledby="d_acct_filter" style="">
+                    
+                        {% for acct in accts %}
+                            <input type="checkbox" name="{{acct.name}}" class="filter_acct_checkbox" id="filter_acct_{{acct.id}}" checked><label for="filter_acct_{{acct.id}}" style="width: 150px;text-wrap:nowrap;">{{acct.name}}</label><br>
+                        {%endfor%}
+                        
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-dark confirm_filter" id="d_confirm_filter" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Confirmed <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-filter" viewBox="0 1 16 16">
+                            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                          </svg>  
+                    </button>
+                    <div class="dropdown-menu checkbox-dropdown" aria-labelledby="d_confirm_filter">
+                        <input type="checkbox" class="filter_confirm_checkbox" name="confirmed" id="filter_confirmed" checked><label for="filter_confirmed">Confirmed</label><br>
+                        <input type="checkbox" class="filter_confirm_checkbox" name="unconfirmed" id="filter_unconfirmed" checked><label for="filter_unconfirmed">Unconfirmed</label>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-dark flag_filter" id="d_flag_filter" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Flags <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-filter" viewBox="0 1 16 16">
+                            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                          </svg>  
+                    </button>
+                    <div class="dropdown-menu checkbox-dropdown" aria-labelledby="d_flag_filter">
+                        <input type="checkbox" class="filter_flag_checkbox" name="travel" id="filter_travel" checked><label for="filter_travel">Travel Spending</label><br>
+                        <input type="checkbox" class="filter_flag_checkbox" name="subscription" id="filter_subscription" checked><label for="filter_subscription">Subscription</label><br>
+                        <input type="checkbox" class="filter_flag_checkbox" name="subscription" id="filter_no_flag" checked><label for="filter_no_flag">Blanks</label>
+                    </div>
+                </div>
+                <button class="btn btn-dark float-right" id="add_tx_btn" type="button">
+                    Add Transaction
+                </button>
+            </div>
+        </div>
+        <table class="tx_table striped-table shadow-sm rounded" id="all_tx_table">
+            <thead class="sticky-top" style="top:95px; background-color:#1D1D1D; border-top: solid 1px #484848; z-index:1010;" >
+                <tr>
+                    <td class="tx_table_date">
+                        Date
+                    </td>
+                    <td class="tx_table_desc" style="width: 100px !important;">
+                        Description
+                    </td>
+                    <td class="tx_table_amt">
+                        Amount
+                    </td>
+                    <td class="tx_table_type">
+                        Type
+                    </td>
+                    <td class="tx_table_theme">
+                        Theme
+                    </td>
+                    <td class="tx_table_cat">
+                        Category
+                    </td>
+                    <td class="tx_table_label">
+                        Labels
+                    </td>
+                    <td class="tx_table_note">
+                        Notes
+                    </td>
+                    <td class="tx_table_acct">
+                        Account
+                    </td>
+                    <td class="tx_table_origdesc" data-toggle="tooltip" data-placement="top" title="Original Description">
+                        OGD
+                    </td>
+                    <td class="tx_table_flags" style="width: 250px !important;">
+                        ePP &amp; Length
+                    </td>
+                    <td>
+                    </td
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in transactions %}
+                    {%if tx.confirmed == True %}
+                    
+                    <tr id="{{tx.transactionId}}">
+                        <td class="date_col">
+                            {{tx.date|date:'m/d/Y'}}
+                        </td>
+                        <td class="desc_col">
+                            {{tx.description}}
+                        </td>
+                        <td class="amount_col">
+                            {{tx.amount}}
+                        </td>
+                        <td>
+                            {{tx.type}}
+                        </td>
+                        <td>
+                            {{tx.category.theme.name}}
+                        </td>
+                        <td class="cat_col">
+                            {{tx.category.name}}
+                        </td>
+                        <td class="labels_col">
+                            {% if tx.part_of_travel_trip  %}
+                                {{tx.travel_trip.name}}                            
+                            {% else %}
+                                {{tx.labels}}
+                            {% endif %}
+                        </td>
+                        <td class="notes_col">
+                            {{tx.notes}}
+                        </td>
+                        <td class="accts_col" id="accts_{{tx.account.id}}" >
+                            {{tx.account.name}}
+                        </td>
+                        <td class="o_desc_col" data-toggle="tooltip" data-placement="top" title="{{tx.original_description}}">
+                            {% comment %} {{tx.original_description}} {% endcomment %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                              </svg>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="equalPayPromo" class="tx_flag form-check-input" id="{{tx.transactionId}}_equalPay_checkbox"  {% if tx.has_equalPaySplit %} checked {% endif %} ><label for="{{tx.transactionId}}_equalPay_checkbox" class="form-check-label tx_flag_label">Equal Pay Promo</label><br>
+                            <label for="{{tx.transactionId}}_eppLength_checkbox" class="form-check-label tx_flag_label">Length</label><input type="text" name="eppLength" class="tx_flag tx_sub_flag form-text-input" id="{{tx.transactionId}}_eppLength_checkbox" style="width: 50px;">
+                        </td>
+                        <td>
+                            <button type="submit" class="icon_button submit_changes_button">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="orange" class="bi bi-check-circle" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                    <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                                </svg>
+                            </button><!--
+                     --></td>
+                        
+                    </tr>
+                    {%else%}
+                        <tr id="{{tx.transactionId}}">
+                            <td class="date_col">
+                                <input type="text" id="date" name="date" form="{{tx.transactionId}}_form" value="{{tx.date|date:'m/d/Y'}}">
+                            </td>
+                            <td class="desc_col">
+                                <input type="text" id="description" name="description" form="{{tx.transactionId}}_form" value="{{tx.description}}">
+                            </td>
+                            <td class="amount_col">
+                                <input type="text" id="amount" name="amount" form="{{tx.transactionId}}_form" value="{{tx.amount}}">
+
+                            </td>
+                            <td>
+                                <select name="type" id="type" form="{{tx.transactionId}}_form" >
+                                {%if tx.type == "credit"%}
+                                    <option value="credit" selected>credit</option>
+                                    <option value="debit">debit</option>
+                                {% else %}
+                                    <option value="credit">credit</option>
+                                    <option value="debit" selected>debit</option>
+                                {%endif%}    
+                                </select>
+                            </td>
+                            <td>
+                                <select name="theme" id="theme" form="{{tx.transactionId}}_form" >
+                                    {% for theme in themes %}
+                                        {%if tx.category.theme == theme%}
+                                            <option value="{{ theme.name }}" selected>{{ theme.name }}</option>
+                                        {% else %}
+                                            <option value="{{ theme.name }}">{{ theme.name }}</option>
+                                        {%endif%}    
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td class="cat_col">
+                                <select name="category" id="category" form="{{tx.transactionId}}_form" >
+                        {% for category in cats %}
+                            {% if category.theme == tx.category.theme %}
+                                {%if tx.category == category%}
+                                    <option value="{{ category.name }}" selected>{{ category.name }}</option>
+                                {% else %}
+                                    <option value="{{ category.name }}">{{ category.name }}</option>
+                                {%endif%}
+                            {%endif%}
+                        {% endfor %}
+                                </select>
+                            </td>
+                            <td class="labels_col">
+                                
+                                    <input type="text" form="{{tx.transactionId}}_form" id="labels" value="{{tx.labels}}"  {% if tx.part_of_travel_trip  %} class="hidden_el" {% endif %}></input>
+                                    <input class="form-control{% if tx.part_of_travel_trip == False  %} hidden_el{% endif %}" form="{{tx.transactionId}}_form" list="tripDatalistOptions" id="tripDataList" placeholder="{% if tx.travel_trip != None %}{{tx.travel_trip.name}}{% else %}Select trip...{%endif%}">
+                                    <datalist id="tripDatalistOptions">
+                                        {% for trip in trips%}
+                                            <option value="{{ trip.name }}">
+                                        {% endfor %}
+                                    </datalist>
+
+                            </td>
+                            <td class="notes_col">
+                                <textarea id="notes" form="{{tx.transactionId}}_form">{{tx.notes}}</textarea>
+                            </td>
+                            <td class="accts_col" id="accts_{{tx.account.id}}" >
+                                {{tx.account.name}}
+                            </td>
+                            <td class="o_desc_col" data-toggle="tooltip" data-placement="top" title="{{tx.original_description}}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                                  </svg>
+                            </td>
+                            <td>
+                                <input type="checkbox" name="Trip" class="tx_flag tx_trip_flag form-check-input" id="{{tx.transactionId}}_trip_checkbox" {% if tx.part_of_travel_trip %} checked {% endif %}><label for="{{tx.transactionId}}_trip_checkbox" class="form-check-label tx_flag_label">Travel Spending</label><br>
+                                <input type="checkbox" name="Sub" class="tx_flag tx_sub_flag form-check-input" id="{{tx.transactionId}}_sub_checkbox" {% if tx.is_subscription %} checked{% endif %}><label for="{{tx.transactionId}}_sub_checkbox" class="form-check-label tx_flag_label">Subscription</label><br>
+                            </td>
+                            <td>
+                                <button type="button" class="icon_button confirm_button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="green" class="bi bi-check-circle" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                                    </svg>
+                                </button><!--
+                            --><button type="submit" class="icon_button submit_changes_button hidden_btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="orange" class="bi bi-check-circle" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                                    </svg>
+                                </button><!--
+                            --><button type="button" class="icon_button split_button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="26" height="20" fill="green" viewBox="0 0 20 20" >
+                                        <g xmlns="http://www.w3.org/2000/svg" transform="translate(-10.000000,10.000000) scale(0.003,-0.003)">
+                                        <path d="M8067.7,3452.6L7779,3163.9l267.1-267.1l267.1-267.1l-764-11.8c-813.1-13.8-1050.7-33.4-1382.6-119.8c-581.3-151.2-936.8-412.4-1341.4-983.9c-108-151.2-241.6-328-298.5-394.8c-257.3-296.6-591.1-459.6-1131.2-549.9c-176.8-29.5-394.7-35.3-1747.9-41.2L100,520.5V110v-410.5l1547.6-7.9c1355.1-5.9,1571.1-9.8,1747.9-41.3C3917.9-436,4259.6-599,4509-877.9c49.1-53,161-198.4,249.4-324.1c312.3-445.8,463.5-606.9,722.7-779.7c489-326,1005.5-422.2,2268.3-422.2H8319l-271-271L7779-2943.9l290.7-290.7l288.7-288.7l771.8,771.8l769.9,769.9l-771.8,771.8l-769.9,769.9l-290.7-290.7L7779-1019.3l265.1-265.1c145.3-145.3,265.1-271,265.1-278.9c0-23.6-1192.1-17.7-1463.1,5.9c-508.7,43.2-805.2,151.2-1048.8,383c-86.4,80.5-229.8,255.3-361.3,439.9c-237.6,335.8-559.7,673.6-736.5,775.7c-55,33.4-100.2,62.9-100.2,68.7s51.1,41.2,111.9,78.6c188.5,115.9,487.1,430.1,720.8,762c125.7,176.8,271,355.5,355.5,434c253.3,241.6,553.8,351.5,1064.5,394.7c269.1,21.6,1457.2,25.5,1457.2,5.9c0-7.9-119.8-135.5-265.1-280.8L7779,1239.3l290.7-290.7l288.7-288.7l771.8,771.8l769.9,769.9l-771.8,771.8l-769.9,769.9L8067.7,3452.6z"></path>
+                                        </g>
+                                    </svg>
+                                </button><!--
+                             --><button type="button" class="icon_button trash_button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-trash3" viewBox="0 0 16 16">
+                                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/>
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                    {%endif%}
+                {% endfor %}
+                </tbody>
+            </table>
+    </div>
+    {% csrf_token %}
+    {% comment %} <script src="{% static 'js/jquery.floatThead.js'%}" type="text/javascript"></script>
+    <script>
+            $('table').floatThead({
+                scrollContainer:function($table){
+                    return $table.closest('.tableContainer');
+              }
+            });  
+            
+    </script> {% endcomment %}
+    <script>
+        var confirmIconSvg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"green\" class=\"bi bi-check-circle\" viewBox=\"0 0 16 16\">\
+            <path d=\"M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z\"/>\
+            <path d=\"M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z\"/>\
+            </svg>";
+        
+        var confirmedIconSvg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"green\" class=\"bi bi-check-circle-fill\" viewBox=\"0 0 16 16\">\
+            <path d=\"M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z\"/>\
+            </svg>"
+
+        var saveChangesIconSvg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"orange\" class=\"bi bi-check-circle\" viewBox=\"0 0 16 16\">\
+            <path d=\"M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z\"/>\
+            <path d=\"M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z\"/>\
+            </svg>";
+        var cancelIconSvg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"gray\" class=\"bi bi-x\" viewBox=\"2 2 12 12\">\
+            <path d=\"M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z\"/>\
+            </svg>";
+        
+        var splitIconSvg = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"26\" height=\"20\" fill=\"green\" viewBox=\"0 0 20 20\" >\
+            <g xmlns=\"http://www.w3.org/2000/svg\" transform=\"translate(-10.000000,10.000000) scale(0.003,-0.003)\">\
+            <path d=\"M8067.7,3452.6L7779,3163.9l267.1-267.1l267.1-267.1l-764-11.8c-813.1-13.8-1050.7-33.4-1382.6-119.8c-581.3-151.2-936.8-412.4-1341.4-983.9c-108-151.2-241.6-328-298.5-394.8c-257.3-296.6-591.1-459.6-1131.2-549.9c-176.8-29.5-394.7-35.3-1747.9-41.2L100,520.5V110v-410.5l1547.6-7.9c1355.1-5.9,1571.1-9.8,1747.9-41.3C3917.9-436,4259.6-599,4509-877.9c49.1-53,161-198.4,249.4-324.1c312.3-445.8,463.5-606.9,722.7-779.7c489-326,1005.5-422.2,2268.3-422.2H8319l-271-271L7779-2943.9l290.7-290.7l288.7-288.7l771.8,771.8l769.9,769.9l-771.8,771.8l-769.9,769.9l-290.7-290.7L7779-1019.3l265.1-265.1c145.3-145.3,265.1-271,265.1-278.9c0-23.6-1192.1-17.7-1463.1,5.9c-508.7,43.2-805.2,151.2-1048.8,383c-86.4,80.5-229.8,255.3-361.3,439.9c-237.6,335.8-559.7,673.6-736.5,775.7c-55,33.4-100.2,62.9-100.2,68.7s51.1,41.2,111.9,78.6c188.5,115.9,487.1,430.1,720.8,762c125.7,176.8,271,355.5,355.5,434c253.3,241.6,553.8,351.5,1064.5,394.7c269.1,21.6,1457.2,25.5,1457.2,5.9c0-7.9-119.8-135.5-265.1-280.8L7779,1239.3l290.7-290.7l288.7-288.7l771.8,771.8l769.9,769.9l-771.8,771.8l-769.9,769.9L8067.7,3452.6z\"></path>\
+            </g></svg>";
+        
+        var infoIconSvg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"currentColor\" class=\"bi bi-info-circle\" viewBox=\"0 0 16 16\">\
+            <path d=\"M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z\"/>\
+            <path d=\"m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z\"/>\
+            </svg>";
+
+            
+        
+        var editIconSvg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"26\" height=\"26\" fill=\"green\" class=\"bi bi-pencil-square\" viewBox=\"0 0 16 16\">\
+            <path d=\"M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z\"/>\
+            <path fill-rule=\"evenodd\" d=\"M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z\"/>\
+            </svg>";
+        
+        
+       
+
+        $(".tx_table").on("click", ".submit_changes_button", function () {
+            var url = "../ajax/setEqualPayPromo"  
+            var tx_id = $(this).parents('tr').attr('id');
+            
+            var parent_row = $(this).parents('tr');
+            var table_cells = parent_row.children();
+            var date_value = table_cells.eq(0).children().eq(0).val();
+            var desc_value = table_cells.eq(1).children().eq(0).val();
+            var amt_value = table_cells.eq(2).children().eq(0).val();
+            var type_value = table_cells.eq(3).children().eq(0).children().filter(":selected").attr('value');
+            var theme_value = table_cells.eq(4).children().eq(0).children().filter(":selected").attr('value');
+            var cat_value = table_cells.eq(5).children().eq(0).children().filter(":selected").attr('value');
+            var labels_value = table_cells.eq(6).children().eq(0).val();
+            var notes_value = table_cells.eq(7).children().eq(0).val();
+            var account_value = table_cells.eq(8).html().trim();
+            //var og_desc_value = table_cells.eq(9).attr('data-original-title');
+            var trip_flag = table_cells.eq(10).children().eq(0).prop("checked");
+            var trip_name = table_cells.eq(6).children().eq(1).val();
+            if(table_cells.eq(6).children().eq(1).attr('placeholder') != "Select trip...")
+            {
+                
+                trip_name = table_cells.eq(6).children().eq(1).attr('placeholder');
+                console.log(trip_name);
+            }
+            var subs_flag = table_cells.eq(10).children().eq(3).prop("checked");
+
+            console.log(trip_flag)
+            console.log(subs_flag)
+            
+            //console.log(og_desc_value);
+
+            $.ajax(
+            {                       // initialize an AJAX request
+                url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+                data: 
+                {
+                'tx_id': tx_id,
+                'tx_date': date_value,
+                'tx_desc': desc_value,
+                'tx_amt': amt_value,
+                'tx_type': type_value,
+                'tx_theme': theme_value,
+                'tx_category': cat_value,
+                'tx_labels': labels_value,
+                'tx_notes': notes_value,
+                'tx_account': account_value,
+                'tx_trip_flag': trip_flag,
+                'tx_trip_name': trip_name,
+                'tx_subs_flag': subs_flag
+                
+                },
+                success: function(data)
+                {
+                    parent_row.addClass("confirmed_tx_row");
+                    table_cells.eq(0).children().eq(0).replaceWith(date_value);
+                    table_cells.eq(1).children().eq(0).replaceWith(desc_value);
+                    table_cells.eq(2).children().eq(0).replaceWith(amt_value);
+                    table_cells.eq(3).children().eq(0).replaceWith(type_value);
+                    table_cells.eq(4).children().eq(0).replaceWith(theme_value);
+                    table_cells.eq(5).children().eq(0).replaceWith(cat_value);
+                    if (trip_flag)
+                    {
+                        table_cells.eq(6).children().eq(1).remove();
+                        table_cells.eq(6).children().eq(0).replaceWith(trip_name);
+                        
+                    }
+                    else
+                    {
+                        table_cells.eq(6).children().eq(1).remove();
+                        table_cells.eq(6).children().eq(0).replaceWith(labels_value);
+                    }
+                    table_cells.eq(7).children().eq(0).replaceWith(notes_value);
+                    table_cells.eq(8).children().eq(0).replaceWith(account_value);
+                    //table_cells.eq(9).children().eq(0).replaceWith(og_desc_value);
+                    table_cells.eq(10).children().eq(0).prop("disabled", true);
+                    table_cells.eq(10).children().eq(3).prop("disabled", true);
+                    table_cells.eq(11).replaceWith(" <td><button class=\"icon_button confirmed_tx\">" + confirmedIconSvg + "</button></td>");
+                    
+                    table_cells = parent_row.children();
+                    table_cells.eq(11).append("<button class=\"icon_button confirmed_tx edit_tx\">" + editIconSvg + "</button> ");
+                    parent_row.removeClass("edit_tx_row");
+                    $("#"+tx_id+ ".confirmed_tx_row.hidden_row.editing").remove()
+                }
+            });
+        });
+
+
+        $(".tx_table").on("click", ".submit_split_changes_button", function() 
+        {
+            var csrftoken = $('[name="csrfmiddlewaretoken"]').val();
+            var url = "../ajax/submitTxSplit/" 
+            
+        
+            var parent_row = $(this).parents('tr');
+            var tx_id = parent_row.attr('id');
+            
+            var orig_table_cells = parent_row.children();
+            var orig_date_value = orig_table_cells.eq(0).children().eq(0).val();
+            var orig_desc_value = orig_table_cells.eq(1).children().eq(0).val();
+            var orig_amt_value = orig_table_cells.eq(2).children().eq(0).val();
+            var orig_type_value = orig_table_cells.eq(3).children().eq(0).children().filter(":selected").attr('value');
+            var orig_theme_value = orig_table_cells.eq(4).children().eq(0).children().filter(":selected").attr('value');
+            var orig_cat_value = orig_table_cells.eq(5).children().eq(0).children().filter(":selected").attr('value');
+            var orig_labels_value = orig_table_cells.eq(6).children().eq(0).val();
+            var orig_notes_value = orig_table_cells.eq(7).children().eq(0).val();
+            var orig_account_value = orig_table_cells.eq(8).html().trim();
+            //var orig_og_desc_value = orig_table_cells.eq(9).html().trim();
+
+            console.log(orig_account_value);
+            //console.log(orig_og_desc_value);
+            var orig_tx = {
+                tx_date: orig_date_value,
+                tx_desc: orig_desc_value,
+                tx_amt: orig_amt_value,
+                tx_type: orig_type_value,
+                tx_category: orig_cat_value,
+                tx_labels: orig_labels_value,
+                tx_notes: orig_notes_value,
+                tx_account: orig_account_value,
+                //tx_og_desc: orig_og_desc_value, 
+                tx_new: false
+            }
+
+            var split_new_tx_elements = $("."+tx_id+"_split");
+
+            var split_new_txs = []
+            //split_new_txs.push(orig_tx)
+
+            var passValidation = true;
+
+            $.each(split_new_tx_elements, function(index, tx)
+            {
+                var table_cells = $(tx).children();
+                var amt_value = table_cells.eq(2).children().eq(0).val();
+                if(amt_value == 0 || amt_value == "" || typeof amt_value === "undefined" || isNaN(amt_value) )
+                {
+                    table_cells.eq(2).children().eq(0).css("border-color", "#F44");
+                    passValidation = false;
+                }
+            });
+
+            if (passValidation == false)
+            {
+                return;
+            }
+
+            
+            $.each(split_new_tx_elements, function(index, tx)
+            {   
+                var id_value = $(tx).attr("id"); 
+                var table_cells = $(tx).children();
+                var date_value = table_cells.eq(0).children().eq(0).val();
+                var desc_value = table_cells.eq(1).children().eq(0).val();
+                var amt_value = table_cells.eq(2).children().eq(0).val();
+                var type_value = table_cells.eq(3).children().eq(0).children().filter(":selected").attr('value');
+                var theme_value = table_cells.eq(4).children().eq(0).children().filter(":selected").attr('value');
+                var cat_value = table_cells.eq(5).children().eq(0).children().filter(":selected").attr('value');
+                var labels_value = table_cells.eq(6).children().eq(0).val();
+                var notes_value = table_cells.eq(7).children().eq(0).val();
+                var account_value = table_cells.eq(8).html().trim();
+                //var og_desc_value = table_cells.eq(9).html().trim();
+                var tx_is_new = $(tx).attr('id')!=tx_id;
+
+                var new_tx = {
+                    page_id: id_value,
+                    tx_date: date_value,
+                    tx_desc: desc_value,
+                    tx_amt: amt_value,
+                    tx_type: type_value,
+                    tx_category: cat_value,
+                    tx_labels: labels_value,
+                    tx_notes: notes_value,
+                    tx_account: account_value,
+                    //tx_og_desc: og_desc_value, 
+                    tx_new: tx_is_new
+                }
+                split_new_txs.push(new_tx);
+            });
+            
+            $.ajax(
+                {
+                                                 // initialize an AJAX request
+                    url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+                    type: "POST",
+                    data: {
+                    'original_tx_id': tx_id,
+                    'split_txs': JSON.stringify(split_new_txs),
+                    'csrfmiddlewaretoken': csrftoken,
+                    },
+                    dataType: 'json',
+                    success: function (data) 
+                        {   
+                            
+                            console.log("Successful Split.");
+                            
+                            var table_cells = $("#"+tx_id+".edit_tx_row").children();
+
+                            var cnfrm_date_value = table_cells.eq(0).children().eq(0).val();
+                            var cnfrm_desc_value = table_cells.eq(1).children().eq(0).val();
+                            var cnfrm_amt_value = table_cells.eq(2).children().eq(0).val();
+                            var cnfrm_type_value = table_cells.eq(3).children().eq(0).children().filter(":selected").attr('value');
+                            var cnfrm_theme_value = table_cells.eq(4).children().eq(0).children().filter(":selected").attr('value');
+                            var cnfrm_cat_value = table_cells.eq(5).children().eq(0).children().filter(":selected").attr('value');
+                            var cnfrm_labels_value = table_cells.eq(6).children().eq(0).val();
+                            var cnfrm_notes_value = table_cells.eq(7).children().eq(0).val();
+                            var cnfrm_account_value = table_cells.eq(8).html().trim();
+                            //var cnfrm_og_desc_value = table_cells.eq(9).html().trim();
+
+                            
+                            table_cells.eq(0).children().eq(0).replaceWith(cnfrm_date_value);
+                            table_cells.eq(1).children().eq(0).replaceWith(cnfrm_desc_value);
+                            table_cells.eq(2).children().eq(0).replaceWith(cnfrm_amt_value);
+                            table_cells.eq(3).children().eq(0).replaceWith(cnfrm_type_value);
+                            table_cells.eq(4).children().eq(0).replaceWith(cnfrm_theme_value);
+                            table_cells.eq(5).children().eq(0).replaceWith(cnfrm_cat_value);
+                            table_cells.eq(6).children().eq(0).replaceWith(cnfrm_labels_value);
+                            table_cells.eq(7).children().eq(0).replaceWith(cnfrm_notes_value);
+                            table_cells.eq(8).children().eq(0).replaceWith(cnfrm_account_value);
+                            table_cells.eq(10).children().eq(0).prop("disabled", true);
+                            table_cells.eq(10).children().eq(3).prop("disabled", true);
+                            table_cells.eq(11).replaceWith("<td><button class=\"icon_button confirmed_tx\">"+confirmedIconSvg+"</button><!--\
+                            --><button class=\"icon_button edit_tx\">"+editIconSvg+"</button></td>");
+                            
+
+                            $("#"+tx_id+".edit_tx_row td:last-child").attr("rowspan", "1");
+                            //$("#"+tx_id+".edit_tx_row td:last-child cancel_split_button").remove();
+                            //$("#"+tx_id+".edit_tx_row td:last-child split_button").remove();
+                            //$("#"+tx_id+".edit_tx_row td:last-child submit_split_changes_button").remove();
+                            //$("#"+tx_id+".edit_tx_row td:last-child confirm_button").remove();
+
+                            $("#"+tx_id+".edit_tx_row").removeClass(tx_id+"_split").removeClass("split_tx_row").removeClass("edit_tx_row").addClass("confirmed_tx_row");
+                            
+                            if($("#"+tx_id+".hidden_row").length > 0)
+                            {
+                                $("#"+tx_id+".hidden_row").remove();
+                            }
+
+                            $.each(data, function(key, value)
+                            {
+                                $("#"+key).attr("id", value);
+                                $("#"+value).removeClass(tx_id+"_split").removeClass("split_tx_row");
+
+                                var new_row_cells = $("#"+value).children();
+
+                                var cnfrm_date_value = new_row_cells.eq(0).children().eq(0).val();
+                                var cnfrm_desc_value = new_row_cells.eq(1).children().eq(0).val();
+                                var cnfrm_amt_value = new_row_cells.eq(2).children().eq(0).val();
+                                var cnfrm_type_value = new_row_cells.eq(3).children().eq(0).children().filter(":selected").attr('value');
+                                var cnfrm_theme_value = new_row_cells.eq(4).children().eq(0).children().filter(":selected").attr('value');
+                                var cnfrm_cat_value = new_row_cells.eq(5).children().eq(0).children().filter(":selected").attr('value');
+                                var cnfrm_labels_value = new_row_cells.eq(6).children().eq(0).val();
+                                var cnfrm_notes_value = new_row_cells.eq(7).children().eq(0).val();
+                                var cnfrm_account_value = new_row_cells.eq(8).html().trim();
+                                var cnfrm_og_desc_value = new_row_cells.eq(9).html().trim();
+
+                                
+                                new_row_cells.eq(0).children().eq(0).replaceWith(cnfrm_date_value);
+                                new_row_cells.eq(1).children().eq(0).replaceWith(cnfrm_desc_value);
+                                new_row_cells.eq(2).children().eq(0).replaceWith(cnfrm_amt_value);
+                                new_row_cells.eq(3).children().eq(0).replaceWith(cnfrm_type_value);
+                                new_row_cells.eq(4).children().eq(0).replaceWith(cnfrm_theme_value);
+                                new_row_cells.eq(5).children().eq(0).replaceWith(cnfrm_cat_value);
+                                new_row_cells.eq(6).children().eq(0).replaceWith(cnfrm_labels_value);
+                                new_row_cells.eq(7).children().eq(0).replaceWith(cnfrm_notes_value);
+                                new_row_cells.eq(8).children().eq(0).replaceWith(cnfrm_account_value);
+                                //new_row_cells.eq(9).children().eq(0).replaceWith("<td class=\"o_desc_col\" data-toggle=\"tooltip\" data-placement=\"top\" title=\""+cnfrm_og_desc_value+"\">" + infoIconSvg + "</td>");
+                                new_row_cells.eq(10).children().eq(0).prop("disabled", true);
+                                new_row_cells.eq(10).children().eq(3).prop("disabled", true);
+                                $("#"+value).append("<td><button class=\"icon_button confirmed_tx\">"+confirmedIconSvg+"</button><!--\
+                                --><button class=\"icon_button edit_tx\">"+editIconSvg+"</button></td>");
+                                $("#"+value).removeClass("edit_tx_row").addClass("confirmed_tx_row");
+                                
+                                var tool = $("#"+tx_id+".confirmed_tx_row .o_desc_col").get(0); 
+                                var tooltip = new bootstrap.Tooltip(tool, { 
+                                    boundary: tool
+                                });
+                            });
+
+                                
+                            
+                        },
+                        error: function(data)
+                        {
+                            console.log("Failed.");
+                            $("."+tx_id+"_split").each(function()
+                            {
+                                var table_cells = $(this).children();
+                                table_cells.eq(2).children().eq(0).css("border-color", "#F44");
+                            });
+                        }
+
+                }
+            );
+        });
+
+        
+        
+        $(".filter_type_checkbox").change(function()
+        {
+            var type_clicked = $(this).attr("id");
+            var selected_type_value = $(this).attr("name");
+            var other_checkbox = $(".filter_type_checkbox").not("#"+type_clicked)[0];
+            if(this.checked)
+            {
+                $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if($(el).hasClass("confirmed_tx_row") && !$(el).hasClass("editing"))
+                        {
+                            if($(el).children().eq(3).html().trim() == selected_type_value)
+                            {
+                                return true;
+                            }
+                            else return false;   
+                        }
+                        else
+                        {
+                            if($(el).children().eq(3).children().eq(0).children().filter(":selected").attr('value') == selected_type_value)
+                            {
+                                return true;
+                            }
+                            else return false;
+                        }
+                    }).removeClass("hidden_type");
+            }
+            else
+            {
+                var x = other_checkbox.checked;
+                if(other_checkbox.checked)
+                {
+                    $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if($(el).hasClass("confirmed_tx_row"))
+                        {
+                            if($(el).children().eq(3).html().trim() == selected_type_value)
+                            {
+                                return true;
+                            }
+                            else return false;
+                        }
+                        else
+                        {
+                            if($(el).children().eq(3).children().eq(0).children().filter(":selected").attr('value') == selected_type_value)
+                            {
+                                return true;
+                            }
+                            else return false;
+                        }
+                    }).addClass("hidden_type");
+                }
+            }
+        });
+
+        $(".filter_theme_checkbox").change(function()
+        {
+            var theme_clicked = $(this).attr("id");
+            var selected_theme_value = $(this).attr("name");
+            var other_themes = $(".filter_theme_checkbox").not("#"+theme_clicked);
+            if(this.checked)
+            {
+                $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if($(el).hasClass("confirmed_tx_row") && !$(el).hasClass("editing"))
+                        {
+                            //var x = el.children().eq(3).html().trim()
+                            if($(el).children().eq(4).text().trim() == selected_theme_value)
+                            {
+                                return true;
+                            }
+                            else return false;   
+                        }
+                        else
+                        {
+                            if($(el).children().eq(4).children().eq(0).children().filter(":selected").attr('value') == selected_theme_value)
+                            {
+                                return true;
+                            }
+                            else return false;
+                        }
+                    }).removeClass("hidden_theme");
+
+            }
+            else
+            {
+                //if(other_themes.filter(":checked").length > 0)
+                //{
+                    $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if($(el).hasClass("confirmed_tx_row"))
+                        {
+                            var x = $(el).children().eq(4).text().trim()
+                            if($(el).children().eq(4).text().trim() == selected_theme_value)
+                            {
+                                return true;
+                            }
+                            else return false;
+                        }
+                        else
+                        {
+                            if($(el).children().eq(4).children().eq(0).children().filter(":selected").attr('value') == selected_theme_value)
+                            {
+                                return true;
+                            }
+                            else return false;
+                        }
+                    }).addClass("hidden_theme");
+                //}
+            }
+            filterCatsBasedOnTheme(selected_theme_value, this.checked);
+        });
+
+        var filterCatsBasedOnTheme = function(themeName, checked)
+        {
+            var url = "../ajax/getCats/";
+            $.ajax(
+            {                       
+                url: url,           
+                data: 
+                {
+                    'theme': themeName
+                },
+                success: function (data) 
+                {   
+                    var categories = data.categories;
+                    
+                    $.each(categories, function(index, cat)
+                    {   
+                        var selector = "#filter_category_"+cat[1];
+                        console.log(selector);
+                        var sel_checkbox = $(selector);
+                        var sel_element = $(selector).parents('.filter_cats_entry');
+                        if(checked)
+                        {
+                            sel_element.removeClass('hidden_category');
+                        }
+                        else
+                        {
+                            sel_element.addClass('hidden_category');
+                        }
+                    });
+                    
+                }
+            }); 
+        };
+
+        $(".filter_cat_checkbox").change(function()
+        {
+            var cat_clicked = $(this).attr("id");
+            var selected_cat_value = $(this).attr("name");
+            var other_cats = $(".filter_cat_checkbox").not("#"+cat_clicked);
+            if(this.checked)
+            {
+                $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if($(el).hasClass("confirmed_tx_row") && !$(el).hasClass("editing"))
+                        {
+                            //var x = el.children().eq(3).html().trim()
+                            if($(el).children().eq(5).text().trim() == selected_cat_value)
+                            {
+                                return true;
+                            }
+                            else return false;   
+                        }
+                        else
+                        {
+                            if($(el).children().eq(5).children().eq(0).children().filter(":selected").attr('value') == selected_cat_value)
+                            {
+                                return true;
+                            }
+                            else return false;
+                        }
+                    }).removeClass("hidden_category");
+            }
+            else
+            {
+                //if(other_cats.filter(":checked").length > 0)
+                //{
+                    $('.tx_table tbody tr').not('.hidden_row').filter(function(index, el)
+                    {
+                        if($(el).hasClass("confirmed_tx_row"))
+                        {
+                            //var x = $(el).children().eq(4).text().trim()
+                            if($(el).children().eq(5).text().trim() == selected_cat_value)
+                            {
+                                return true;
+                            }
+                            else return false;
+                        }
+                        else
+                        {
+                            if($(el).children().eq(5).children().eq(0).children().filter(":selected").attr('value') == selected_cat_value)
+                            {
+                                return true;
+                            }
+                            else return false;
+                        }
+                    }).addClass("hidden_category");
+                //}
+            }
+        });
+        
+        $("#filter_select_all_theme").click(function(el) 
+        {
+            el.stopPropagation();
+            $(".filter_theme_checkbox").each(function(index, checkbox)
+            {
+                checkbox.checked = true;
+                $(checkbox).trigger("change");
+            });
+            
+        });
+
+        $("#filter_select_none_theme").click(function(el) 
+        {
+            el.stopPropagation();
+            $(".filter_theme_checkbox").each(function(index, checkbox)
+            {
+                checkbox.checked = false;
+                $(checkbox).trigger("change");
+            });
+            
+        });
+
+        $("#filter_select_all_cat").click(function(el) 
+        {
+            el.stopPropagation();
+            $(".filter_cat_checkbox").each(function(index, checkbox)
+            {
+                checkbox.checked = true;
+                $(checkbox).trigger("change");
+            });
+            
+        });
+
+        $("#filter_select_none_cat").click(function(el) 
+        {
+            el.stopPropagation();
+            $(".filter_cat_checkbox").each(function(index, checkbox)
+            {
+                checkbox.checked = false;
+                $(checkbox).trigger("change");
+            });
+            
+        });
+        $(".filter_confirm_checkbox").change(function()
+        {
+            var confirm_clicked = $(this).attr("id");
+            //var selected_theme_value = $(this).attr("name");
+            //var other_themes = $(".filter_theme_checkbox").not("#"+theme_clicked);
+            if(this.checked)
+            {
+                if(confirm_clicked == "filter_confirmed")
+                {
+                    $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if($(el).hasClass("confirmed_tx_row") && !$(el).hasClass("editing"))
+                        {   
+                            return true;
+                        }
+                        else return false;   
+                    }).removeClass("hidden_confirm");
+                }
+                else
+                {
+                    $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if(!$(el).hasClass("confirmed_tx_row"))
+                        {   
+                            return true;
+                        }
+                        else return false;   
+                    }).removeClass("hidden_confirm");
+                }
+                
+            }
+            else
+            {
+                if(confirm_clicked == "filter_confirmed")
+                {
+                    $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if($(el).hasClass("confirmed_tx_row") && !$(el).hasClass("editing"))
+                        {
+                            return true;   
+                        }
+                        else return false;
+                        
+                    }).addClass("hidden_confirm");
+                }
+                else
+                {
+                    $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if(!$(el).hasClass("confirmed_tx_row"))
+                        {
+                            return true;   
+                        }
+                        else return false;
+                        
+                    }).addClass("hidden_confirm");
+                }
+                
+            }
+        });
+        $("#date_filter_submit_btn").click(function()
+        {
+            var startDate = $("#date_filter_start").val();
+            var endDate = $("#date_filter_end").val();
+        });
+        
+        $(".filter_acct_checkbox").change(function()
+        {
+            var acct_clicked = $(this).attr("id");
+            var selected_acct_value = $(this).attr("name");
+            //var other_cats = $(".filter_cat_checkbox").not("#"+cat_clicked);
+            if(this.checked)
+            {
+                $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if($(el).hasClass("confirmed_tx_row") && !$(el).hasClass("editing"))
+                        {
+                            //var x = el.children().eq(3).html().trim()
+                            if($(el).children().eq(8).text().trim() == selected_acct_value)
+                            {
+                                return true;
+                            }
+                            else return false;   
+                        }
+                        else
+                        {
+                            if($(el).children().eq(8).children().eq(0).children().filter(":selected").attr('value') == selected_acct_value)
+                            {
+                                return true;
+                            }
+                            else return false;
+                        }
+                    }).removeClass("hidden_category");
+            }
+            else
+            {
+                //if(other_cats.filter(":checked").length > 0)
+                //{
+                    $('.tx_table tbody tr').not('.hidden_row').filter(function(index, el)
+                    {
+                        if($(el).hasClass("confirmed_tx_row"))
+                        {
+                            //var x = $(el).children().eq(4).text().trim()
+                            if($(el).children().eq(8).text().trim() == selected_acct_value)
+                            {
+                                return true;
+                            }
+                            else return false;
+                        }
+                        else
+                        {
+                            if($(el).children().eq(8).children().eq(0).children().filter(":selected").attr('value') == selected_acct_value)
+                            {
+                                return true;
+                            }
+                            else return false;
+                        }
+                    }).addClass("hidden_category");
+                //}
+            }
+        });
+        
+        $(".filter_flag_checkbox").change(function()
+        {
+            console.log("Hit 1")
+            var filter_clicked = $(this).attr("id");
+            //var selected_theme_value = $(this).attr("name");
+            //var other_themes = $(".filter_theme_checkbox").not("#"+theme_clicked);
+            if(this.checked)
+            {
+                if(filter_clicked == "filter_travel")
+                {
+                    $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if($(el).children().eq(10).children().eq(0).prop("checked"))
+                        {   
+                            return true;
+                        }
+                        else return false;   
+                    }).removeClass("hidden_flag");
+                }
+                else if(filter_clicked == "filter_subscription")
+                {
+                    $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if($(el).children().eq(10).children().eq(3).prop("checked"))
+                        {   
+                            return true;
+                        }
+                        else return false;   
+                    }).removeClass("hidden_flag");
+                }
+                else
+                {
+                    $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if($(el).children().eq(10).children().eq(3).prop("checked") || $(el).children().eq(10).children().eq(0).prop("checked"))
+                        {   
+                            return false;
+                        }
+                        else return true;   
+                    }).removeClass("hidden_flag");
+                }
+                
+            }
+            else
+            {
+                if(filter_clicked == "filter_travel")
+                {
+                    $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        
+                        if($(el).children().eq(10).children().eq(0).prop("checked"))
+                        {   
+                            return true;
+                        }
+                        else return false;   
+                        
+                    }).addClass("hidden_flag");
+                }
+                else if(filter_clicked == "filter_subscription")
+                {
+                    $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if($(el).children().eq(10).children().eq(3).prop("checked"))
+                        {   
+                            return true;
+                        }
+                        else return false;   
+                    }).addClass("hidden_flag");
+                }
+                else
+                {
+                    $('.tx_table tbody tr').filter(function(index, el)
+                    {
+                        if($(el).children().eq(10).children().eq(3).prop("checked") || $(el).children().eq(10).children().eq(0).prop("checked"))
+                        {   
+                            return false;
+                        }
+                        else return true;   
+                    }).addClass("hidden_flag");
+                }
+                
+            }
+        });
+
+        $("#add_tx_btn").click(function()
+        {
+            var new_tx_rows = $(".new_tx_row");
+            var max_new_tx_id = 0;
+            var new_tx_id = 1;
+            $.each(new_tx_rows, function(index, newtx){
+                if(parseInt(newtx.attributes['newTxNum'].value) > parseInt(max_new_tx_id)){
+                    max_new_tx_id = parseInt(newtx.attributes['newTxNum'].value);
+                };
+            });
+
+            if(max_new_tx_id >= parseInt(new_tx_id))
+            {
+                new_tx_id = max_new_tx_id + 1;
+            }
+            
+            var url = "../ajax/getOptionsForNewTx/"; 
+
+            $.ajax(
+                {                       // initialize an AJAX request
+                    url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+                    success: function(data)
+                    {
+                        var themes = data.themes;
+                        var cats = data.cats;
+                        var accts = data.accts;
+                        var trips = data.trips;
+
+                        var typeSelectionHtml = "<option value=\"credit\" selected>credit</option><option value=\"debit\">debit</option>";
+                        var themeSelectionHtml = "";
+                        $.each(themes, function(index, theme) {
+                            themeSelectionHtml += "<option value=\"" + theme + "\">"+ theme + "</option>";
+                        });
+                        var categorySelectionHtml = "";
+                        $.each(cats, function(index, cat) {
+                            categorySelectionHtml += "<option value=\"" + cat + "\">"+ cat + "</option>";
+                        });
+                        var accountSelectionHtml = "";
+                        $.each(accts, function(index, acct) {
+                            accountSelectionHtml += "<option value=\"" + acct + "\">"+ acct + "</option>";
+                        });
+                        
+                        var tripSelectionHtml = "";
+                        $.each(trips, function(index, trip) {
+                            tripSelectionHtml += "<option value=\"" + trip + "\">"+ trip + "</option>";
+                        })
+
+                        trip_datalist_placeholder = "Select trip...";
+
+                        tx_table_body = $('#all_tx_table tbody');
+            
+                        tx_table_body.prepend($(document.createElement("tr")).attr({id: "new_tx_"+new_tx_id, class: "new_tx_row edit_tx_row", newTxNum: new_tx_id}));
+                        $("#new_tx_" + new_tx_id).append("<td class=\"date_col\"><input type=\"text\" name=\"date\" form=\"new_tx_"+new_tx_id+"_form\" value=\"\"></td>");
+                        $("#new_tx_" + new_tx_id).append("<td class=\"desc_col\"><input type=\"text\" name=\"desc\" form=\"new_tx_"+new_tx_id+"_form\" value=\"\"></td>");
+                        $("#new_tx_" + new_tx_id).append("<td class=\"amount_col\"><input type=\"text\" name=\"amt\" form=\"new_tx_"+new_tx_id+"_form\" placeholder=\"\" id=\""+new_tx_id+"_split_amt\"></td>");
+                        $("#new_tx_" + new_tx_id).append("<td><select name=\"type\" id=\"type\" form=\"new_tx_"+new_tx_id+"_form\">" + typeSelectionHtml + "</select></td>");
+                        $("#new_tx_" + new_tx_id).append("<td><select name=\"theme\" id=\"theme\" form=\"new_tx_"+new_tx_id+"_form\">"+themeSelectionHtml + "</select></td>");
+                        $("#new_tx_" + new_tx_id).append("<td class=\"cat_col\"></td>");
+                        $("#new_tx_" + new_tx_id + " .cat_col").append("<select name=\"category\" id=\"category\" form=\"new_tx_"+new_tx_id+"_form\">" + categorySelectionHtml + "</select>");
+                        //$("#new_tx_" + new_tx_id).append("<td class=\"labels_col\"><input type=\"text\" form=\"new_tx_"+new_tx_id+"_form\" value=\"\"></input></td>");
+                        $("#new_tx_" + new_tx_id).append("<td class=\"labels_col\"></td>");
+                        $("#new_tx_" + new_tx_id + " .labels_col").append("<input type=\"text\" id=\"labels\" form=\"new_tx_"+new_tx_id+"_form\" value=\"\"></input>");
+                        $("#new_tx_" + new_tx_id + " .labels_col").append("<input class=\"form-control hidden_el\"  list=\"tripDatalistOptions\" id=\"tripDataList\" placeholder=\""+trip_datalist_placeholder+"\">\
+                        <datalist id=\"tripDatalistOptions\">" + tripSelectionHtml + "</datalist>");
+                        $("#new_tx_" + new_tx_id).append("<td class=\"notes_col\"><textarea form=\"new_tx_"+new_tx_id+"_form\"></textarea></td>");
+                        $("#new_tx_" + new_tx_id).append("<td><select style=\"width:124px;\" name=\"acct\" id=\"acct\" form=\"new_tx_"+new_tx_id+"_form\">"+accountSelectionHtml+"</select></td>");
+                        $("#new_tx_" + new_tx_id).append("<td class=\"o_desc_col\"><input type=\"text\" name=\"o_desc\" form=\"new_tx_"+new_tx_id+"_form\" value=\"\"></td>");
+                        $("#new_tx_" + new_tx_id).append("<td>\
+                            <input type=\"checkbox\" name=\"Trip\" class=\"tx_flag tx_trip_flag form-check-input\" id=\"new_tx_"+new_tx_id+"_trip_checkbox\"><label for=\"new_tx_" + new_tx_id + "_trip_checkbox\" class=\"form-check-label tx_flag_label\">Travel Spending</label><br>\
+                            <input type=\"checkbox\" name=\"Sub\" class=\"tx_flag tx_sub_flag form-check-input\" id=\"new_tx_"+new_tx_id+"_sub_checkbox\"><label for=\"new_tx_" + new_tx_id + "_sub_checkbox\" class=\"form-check-label tx_flag_label\">Subscription</label><br>\
+                        </td>")
+                        $("#new_tx_" + new_tx_id).append("<td></td>");
+
+                        var confirmButton = document.createElement("button");
+                        confirmButton.className = "icon_button confirm_new_tx_button";
+                        confirmButton.setAttribute("type", "button");
+
+                        $("#new_tx_" + new_tx_id + " td:last-child").append(confirmButton)
+                        $("#new_tx_" + new_tx_id + " td:last-child button").append(confirmIconSvg);
+
+                        var cancelButton = document.createElement("button");
+                        cancelButton.className = "icon_button cancel_new_tx_button";
+                        cancelButton.setAttribute("type", "button");
+                        
+                        $("#new_tx_" + new_tx_id + " td:last-child").append(cancelButton);
+                        $("#new_tx_" + new_tx_id + " td:last-child button:last-child").append(cancelIconSvg);
+                        
+                    }
+                });
+        });
+
+        $(".tx_table").on("click", ".confirm_new_tx_button", function()
+        {
+            var parent_row = $(this).parents('tr');
+            console.log("Save New TX Button click works.");
+            
+            
+            var table_cells = $(parent_row).children();
+            var date_value = table_cells.eq(0).children().eq(0).val();
+
+            var desc_value = table_cells.eq(1).children().eq(0).val();
+
+            var amt_value = table_cells.eq(2).children().eq(0).val();
+
+            var type_value = table_cells.eq(3).children().eq(0).children().filter(":selected").attr('value');
+
+            var theme_value = table_cells.eq(4).children().eq(0).children().filter(":selected").attr('value');
+
+            var cat_value = table_cells.eq(5).children().eq(0).children().filter(":selected").attr('value');
+
+            var labels_value = table_cells.eq(6).children().eq(0).val();
+
+            var notes_value = table_cells.eq(7).children().eq(0).val();
+
+            var account_value = table_cells.eq(8).children().eq(0).children().filter(":selected").attr('value');
+
+            var og_desc_value = table_cells.eq(9).children().eq(0).val();
+
+            var trip_flag = table_cells.eq(10).children().eq(0).prop("checked");
+            var trip_name = table_cells.eq(6).children().eq(1).val();
+            
+            var subs_flag = table_cells.eq(10).children().eq(3).prop("checked");
+
+
+            var new_tx = {
+                
+                tx_date: date_value,
+                tx_desc: desc_value,
+                tx_amt: amt_value,
+                tx_type: type_value,
+                tx_category: cat_value,
+                tx_labels: labels_value,
+                tx_notes: notes_value,
+                tx_account: account_value,
+                tx_og_desc: og_desc_value, 
+                tx_trip_flag: trip_flag,
+                tx_trip_name: trip_name,
+                tx_subs_flag: subs_flag,
+                
+            }
+
+            var url = "../ajax/saveNewTx/" 
+            
+            $.ajax(
+                {                       // initialize an AJAX request
+                    url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+                    data: {
+                    'tx_id': 1,
+                    'tx_date': date_value,
+                    'tx_desc': desc_value,
+                    'tx_amt': amt_value,
+                    'tx_type':type_value,
+                    'tx_category':cat_value,
+                    'tx_labels':labels_value,
+                    'tx_notes':notes_value,
+                    'acct':account_value,
+                    'o_desc':og_desc_value,
+                    'trip_flag':trip_flag,
+                    'trip_name':trip_name,
+                    'subs_flag':subs_flag
+                    },
+                    success: function (data) 
+                    {   
+                        tx_id = data.created_id;
+                        console.log("New transaction saved successfully.");
+                        console.log(tx_id);
+                        
+                        var cnfrm_date_value = table_cells.eq(0).children().eq(0).val();
+                        var cnfrm_desc_value = table_cells.eq(1).children().eq(0).val();
+                        var cnfrm_amt_value = table_cells.eq(2).children().eq(0).val();
+                        var cnfrm_type_value = table_cells.eq(3).children().eq(0).children().filter(":selected").attr('value');
+                        var cnfrm_theme_value = table_cells.eq(4).children().eq(0).children().filter(":selected").attr('value');
+                        var cnfrm_cat_value = table_cells.eq(5).children().eq(0).children().filter(":selected").attr('value');
+                        var cnfrm_labels_value = table_cells.eq(6).children().eq(0).val();
+                        var cnfrm_notes_value = table_cells.eq(7).children().eq(0).val();
+                        var cnfrm_account_value = table_cells.eq(8).html().trim();
+                        var cnfrm_og_desc_value = table_cells.eq(9).html().trim();
+
+                        
+                        table_cells.eq(0).children().eq(0).replaceWith(date_value);
+                        table_cells.eq(1).children().eq(0).replaceWith(desc_value);
+                        table_cells.eq(2).children().eq(0).replaceWith(amt_value);
+                        table_cells.eq(3).children().eq(0).replaceWith(type_value);
+                        table_cells.eq(4).children().eq(0).replaceWith(theme_value);
+                        table_cells.eq(5).children().eq(0).replaceWith(cat_value);
+                        table_cells.eq(6).children().eq(0).replaceWith(labels_value);
+                        table_cells.eq(7).children().eq(0).replaceWith(notes_value);
+                        table_cells.eq(8).children().eq(0).replaceWith(account_value);
+                        table_cells.eq(9).replaceWith("<td class=\"o_desc_col\" data-toggle=\"tooltip\" data-placement=\"top\" title=\""+og_desc_value+"\">" + infoIconSvg + "</td>");
+                        table_cells.eq(10).children().eq(0).prop("disabled", true);
+                        table_cells.eq(10).children().eq(3).prop("disabled", true);
+                        table_cells.eq(11).replaceWith(" <td><button class=\"icon_button confirmed_tx\">"+confirmedIconSvg+"</button><!--\
+                            --><button class=\"icon_button edit_tx\">"+editIconSvg+"</button></td>");
+                        
+                        parent_row.attr({id: tx_id, class: "confirmed_tx_row"});
+
+                        parent_row.removeAttr('newTxNum');
+                        
+                        var tool = $("#"+tx_id+".confirmed_tx_row .o_desc_col").get(0); 
+                        var tooltip = new bootstrap.Tooltip(tool, { 
+                            boundary: tool
+                        });
+
+
+                    },
+                    error: function(data)
+                    {
+                        console.log("Failed new Tx save.");
+                        /*$.each(data.problems, function(index, value)
+                        {
+                            $("."+)
+                        });*/
+                    }
+            }); 
+                
+        });
+
+        $(".tx_table").on("click", ".cancel_new_tx_button", function()
+        {
+            var parent_row = $(this).parents('tr');
+            parent_row.remove();
+        });
+
+      </script>
+
+
+{% endblock %}

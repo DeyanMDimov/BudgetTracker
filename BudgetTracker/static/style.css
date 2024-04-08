@@ -1,0 +1,300 @@
+body
+{
+    background-color: #121212;
+    /* color: #ECDBBA; */
+    color: #D4d4d4;
+}
+
+.btn-link
+{
+    color: #ECDBBA;
+}
+
+.container{
+    max-width: 1700px !important;
+    font-family: BlinkMacSystemFont, sans-serif;
+
+
+}
+
+.nav-menu .menu-item{
+    display: inline;
+}
+
+.nav-menu{
+    padding-inline-start: 0px;
+}
+
+.delete_category
+{
+    color: #fff;
+}
+
+.tx_table, .summary_table{
+    table-layout: fixed;
+    border-collapse: collapse;
+    width:1640px;
+    background-color: #1D1D1D;
+    margin-bottom:15px;
+}
+
+.summary_theme_tbody:nth-of-type(4n+1)
+{
+    filter: brightness(120%);
+}
+
+.tx_table tr, .summary_table tr
+{
+    height: 40px;
+    border: solid 1px #484848;
+    font-size:14px;
+    background-color:#1D1D1D;
+}
+.tx_table td, .summary_table td{
+    border: solid 1px #484848;
+    padding-left: 5px;
+}
+
+.confirmed_tx_row td{
+    padding-left: 8px;
+}
+
+.o_desc_col{
+    padding-left: 8px !important;
+}
+
+.tx_table td input, .tx_table td select{
+    background-color: #1D1D1D;
+    color: #c6c6c6;
+}
+
+.tx_table td input{
+    border: solid 1px #646464;
+}
+
+.tx_table_date
+{
+    width: 100px;
+}
+.tx_table_desc
+{
+    width: 200px;
+}
+.tx_table_amt
+{
+    width: 90px;
+}
+.tx_table_type{
+    width: 75px;
+}
+.tx_table_theme{
+    width: 178px;
+}
+.tx_table_cat{
+    width: 200px;
+}
+.tx_table_label
+{
+    width: 150px;
+}
+.tx_table_note{
+    width: 220px;
+}
+.tx_table_acct{
+    width: 140px;
+}
+.tx_table_origdesc, .o_desc_col
+{
+    overflow:hidden;
+    white-space:nowrap;
+    width: 44px;
+}
+
+.tx_table_flags{
+    width: 143px;
+}
+
+.tx_flag{
+    margin-left:0.25rem !important;
+}
+
+.tx_flag_label{
+    margin-left:1.3rem !important;
+}
+.date_col input{
+    width: 90px;
+}
+
+.amount_col input{
+    width: 80px;
+}
+
+.cat_col select{
+    width: 180px;
+}
+.labels_col input {
+    width: 140px;
+}
+.notes_col textarea{
+    width: 200px;
+    height: 40px;
+    margin:6px 4px 2px;
+    color: #c6c6c6;
+    background-color: #1D1D1D;
+}
+.tx_table tr td select 
+{
+    padding:4px 1px !important; 
+}
+
+/* .tx_table thead tr td:first-child
+{
+    border-radius: 2rem !important;
+} */
+
+.icon_button{
+    border:none;
+    background-color:transparent;
+    padding: 1px 3px !important;
+    color: #D4d4d4;
+}
+
+.summary_theme_button
+{
+    border:none;
+    background-color:transparent;
+    padding: 1px 3px !important;
+    color: #D4d4d4;
+    font-size:14px;
+    text-align: left;
+}
+.summary_theme_button:hover
+{
+    color: #FFF;
+}
+.confirmed_tx_row{
+    /*background-color:rgb(179, 206, 179) !important;*/
+    background-color: #013320 !important;
+}
+
+.hidden_btn, .hidden_row, .hidden_theme, .hidden_category, .hidden_type, .hidden_amt, .hidden_desc, .hidden_confirm, .hidden_el, .hidden_flag{
+    display:none;
+}
+
+.tx_form{
+    display:inline;
+}
+
+.form-control
+{
+    font-size:14px !important;
+    padding: 0.25rem 0.25rem !important;
+    line-height: 1.2 !important;
+}
+
+.theme-collapse-btn
+{
+    display:block !important;
+}
+
+#viewTx_filters
+{
+    margin: 10px 0;
+}
+
+.dropdown{
+    display: inline;
+}
+
+.dropdown-menu
+{
+    width: 220px;
+    font-size: 12px;
+    padding: 10px;
+    max-height: 600px;
+    
+}
+
+.dropdown-menu.show
+{
+    z-index:9999;
+}
+
+.checkbox-dropdown
+{
+    font-size:14px;
+    overflow: scroll;
+    overflow-x:hidden;
+}
+
+.checkbox-dropdown input
+{
+    margin-top:2px;
+    margin-right: 5px;
+}
+
+.dropdown-menu.category-dropdown
+{
+    overflow-y: hidden;
+}
+
+.checkbox-dropdown-long
+{
+    height: 550px;
+    width: 220px;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+.box
+{
+    margin: 10px 0;
+}
+
+.filter_theme_checkbox, .filter_cat_checkbox, .filter_type_checkbox, .filter_confirm_checkbox
+{
+    height: 16px; 
+    width: 16px;
+    vertical-align: text-bottom;
+}
+
+.summary_table td{
+    font-family: 'Bootstrap-icons', 'Helvetica';
+}
+
+.theme-search, .category-search{
+    float: right;
+    margin-right: 3px;
+}
+
+.filter_acct_checkbox{
+    vertical-align:middle;
+}
+/*
+#modelSummary tr td{
+    text-align: center;
+}
+
+#modelSummary thead{
+    font-size:16px;
+}
+
+#modelSummary thead td{
+    padding: 0 5px;
+}
+
+width: 100px;
+ .modelSummaryLine {
+}
+*/
+
+.tooltip-inner{
+    text-align:left !important;
+    
+}
+
+.change_case{
+    font-size: 10px;
+    margin: 0 4px !important;
+    padding: 4px 4px !important;
+}

@@ -179,28 +179,20 @@ def transformCategory(csv_cat, csv_desc):
     
     return result_category
             
+# Account names as they appear in imported CSVs -> account.name in the database.
+# Names not listed here are expected to match account.name exactly.
+CSV_ACCOUNT_ALIASES = {
+    "Quicksilver": "CAPITAL ONE - Credit Card",
+    "Chase Card": "CHASE - Credit Card",
+    "Premier Savings 4094": "HUNTINGTON - Savings Account",
+    "TCF FREE CHECKING": "TCF Bank - Checking Account",
+    "TCF CLASSIC SAVINGS": "TCF Bank - Savings Account",
+    "TCF POWER SAVINGS": "TCF Bank - Savings Account",
+}
+
 def setAccount(csv_account):
-    selected_account = None
     print(csv_account)
-    if(csv_account == "Quicksilver"):
-        selected_account = account.objects.get(name = "CAPITAL ONE - Credit Card")
-    elif(csv_account == "Chase Card"):
-        selected_account = account.objects.get(name = "CHASE - Credit Card")
-    elif(csv_account == "Premier Savings 4094"):
-        selected_account = account.objects.get(name = "HUNTINGTON - Savings Account")
-    elif(csv_account == "TCF FREE CHECKING"):
-        selected_account = account.objects.get(name = "TCF Bank - Checking Account")
-    elif(csv_account == "TCF CLASSIC SAVINGS"):
-        selected_account = account.objects.get(name = "TCF Bank - Savings Account")
-    elif(csv_account == "TCF POWER SAVINGS"):
-        selected_account = account.objects.get(name = "TCF Bank - Savings Account")
-    elif(csv_account == "HUNTINGTON - Checking Account"):
-        selected_account = account.objects.get(name = "HUNTINGTON - Checking Account")
-    else:
-        print(csv_account)
-        selected_account = account.objects.get(name = csv_account)
-    
-    return selected_account
+    return account.objects.get(name = CSV_ACCOUNT_ALIASES.get(csv_account, csv_account))
 
 
 

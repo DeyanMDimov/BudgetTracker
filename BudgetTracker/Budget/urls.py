@@ -7,6 +7,7 @@ urlpatterns = [
     path('importData/', views.importTx, name='importTx'),
     path('viewTx/', views.viewTx, name="viewTx"),
     path('viewSummary/', views.viewSummary, name="viewSummary"),
+    path('reconcile/', views.reconcile, name="reconcile"),
     path('cleanse/', views.cleanseForPublic, name="cleanseForPublic"),
     path('equalPay/', views.equalPay, name="equalPay"),
     path('ajax/confirmTx/', views.confirmTx, name="confirmTx"),

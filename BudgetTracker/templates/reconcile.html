@@ -1,0 +1,257 @@
+{% extends 'base.html'%}
+{% load static %}
+{% load templateFilters %}
+{% block reconcile %}
+<style>
+    .reconcile_page { padding-bottom: 40px; }
+    .reconcile_hint, .rec_muted { color: #9a9a9a; }
+    .reconcile_form {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 12px 20px;
+        background-color: #1D1D1D;
+        border: solid 1px #484848;
+        border-radius: 4px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
+    }
+    .reconcile_field label { display: block; font-size: 13px; color: #9a9a9a; margin-bottom: 4px; }
+    .reconcile_form input, .reconcile_form select {
+        background-color: #121212;
+        color: #D4d4d4;
+        border: solid 1px #646464;
+        border-radius: 3px;
+        padding: 4px 6px;
+        color-scheme: dark;
+    }
+    .reconcile_form small { flex-basis: 100%; color: #9a9a9a; }
+
+    .reconcile_result_header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin-top: 10px; }
+    .reconcile_result_header h4 { margin: 0; }
+    .reconcile_result_header .badge { font-size: 14px; }
+    .reconcile_notes { color: #9a9a9a; font-size: 14px; padding-left: 20px; margin: 8px 0 14px; }
+    .reconcile_notes code { color: #c6c6c6; }
+
+    .reconcile_table {
+        border-collapse: collapse;
+        background-color: #1D1D1D;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+    .reconcile_table td { border: solid 1px #484848; padding: 6px 10px; }
+    .reconcile_table thead td { background-color: #262626; font-weight: 600; }
+    .reconcile_table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .reconcile_summary td:first-child { min-width: 190px; }
+    .reconcile_summary .num { min-width: 120px; }
+
+    .rec_mismatch td { background-color: rgba(220, 53, 69, 0.16); }
+    .rec_mismatch .rec_diff { color: #f19999; font-weight: 600; }
+    .rec_match .rec_diff { color: #8fd19e; }
+
+    .reconcile_days .rec_day_row { cursor: pointer; }
+    .reconcile_days .rec_day_row:hover td { filter: brightness(130%); }
+    .reconcile_days:not(.show_matching) .matching_day { display: none; }
+    .reconcile_days.all_days_match:not(.show_matching) { display: none; }
+    .rec_detail_row > td { background-color: #161616; }
+    .rec_detail { display: flex; flex-wrap: wrap; gap: 16px 30px; padding: 4px 0; }
+    .rec_detail h6 { margin: 4px 0 6px; color: #9a9a9a; }
+    .rec_detail table td { border: none; border-bottom: solid 1px #333; padding: 3px 10px 3px 0; }
+    .rec_credit { color: #8fd19e; }
+</style>
+
+<div class="container reconcile_page">
+    <h3>Reconcile with a statement</h3>
+    <p class="reconcile_hint">
+        Upload the CSV from your card or bank and choose the account it belongs to. The page compares
+        total charges and credits between the statement and your transactions, overall and day by day.
+        Splitting a transaction doesn't affect the check, because only totals are compared.
+    </p>
+
+    <form method="POST" enctype="multipart/form-data" class="reconcile_form">
+        {% csrf_token %}
+        <div class="reconcile_field">
+            <label for="statement_file">Statement CSV</label>
+            <input type="file" id="statement_file" name="statement_file" accept=".csv,text/csv">
+        </div>
+        <div class="reconcile_field">
+            <label for="account">Account</label>
+            <select id="account" name="account">
+                <option value="">All accounts</option>
+                {% for acc in accounts %}
+                <option value="{{acc.id}}" {% if acc.id|stringformat:"s" == selectedAccountId %}selected{% endif %}>{{acc.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="reconcile_field">
+            <label for="start_date">From</label>
+            <input type="date" id="start_date" name="start_date" value="{{startDate}}">
+        </div>
+        <div class="reconcile_field">
+            <label for="end_date">To</label>
+            <input type="date" id="end_date" name="end_date" value="{{endDate}}">
+        </div>
+        <div class="reconcile_field">
+            <button type="submit" class="btn btn-primary btn-sm">Compare</button>
+        </div>
+        <small>
+            Leave the dates empty to use the first and last dates in the statement. If you don't upload a
+            statement, you get your tracker's totals for that account and date range.
+        </small>
+    </form>
+
+    {% if errors %}
+    <div class="alert alert-danger">
+        {% for error in errors %}<div>{{error}}</div>{% endfor %}
+    </div>
+    {% endif %}
+
+    {% if comparison %}
+    <div class="reconcile_result_header">
+        <h4>{{statementFileName}} vs. tracker</h4>
+        <span>{{selectedAccount.name|default:"All accounts"}} &middot; {{startDate}} to {{endDate}}</span>
+        {% if comparison.allMatch %}
+            <span class="badge badge-success">Totals match</span>
+        {% else %}
+            <span class="badge badge-danger">Totals don't match</span>
+        {% endif %}
+    </div>
+    <ul class="reconcile_notes">
+        <li>How the statement was read: {{statementFormat}}</li>
+        {% for note in notes %}<li>{{note}}</li>{% endfor %}
+        {% if skippedCount %}
+        <li>
+            {{skippedCount}} row(s) were skipped because their date or amount couldn't be read, for example:
+            {% for example in skippedExamples %}<br><code>{{example}}</code>{% endfor %}
+        </li>
+        {% endif %}
+    </ul>
+
+    <table class="reconcile_table reconcile_summary">
+        <thead>
+            <tr>
+                <td></td>
+                <td class="num">Statement</td>
+                <td class="num">Tracker</td>
+                <td class="num">Difference<br><small class="rec_muted">tracker &minus; statement</small></td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in comparison.totals %}
+            <tr class="{% if line.matches %}rec_match{% else %}rec_mismatch{% endif %}">
+                <td>{{line.label}}</td>
+                <td class="num">{{line.statement|money}}</td>
+                <td class="num">{{line.tracker|money}}</td>
+                <td class="num rec_diff">{% if line.matches %}<i class="bi bi-check-lg"></i> 0.00{% else %}{{line.difference|signed_money}}{% endif %}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td>Transactions</td>
+                <td class="num">{{comparison.statementCount}}</td>
+                <td class="num">{{comparison.trackerCount}}</td>
+                <td class="rec_muted">Expected to differ if you split transactions</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h5 class="mt-4">By day</h5>
+    <p class="rec_muted">
+        {% if comparison.mismatchedDayCount %}
+            {{comparison.mismatchedDayCount}} day(s) don't match. Click a day to see the transactions on both sides.
+        {% else %}
+            Every day matches.
+        {% endif %}
+        <label class="ml-3"><input type="checkbox" id="show_matching_days"> Show matching days</label>
+    </p>
+    <table class="reconcile_table reconcile_days {% if not comparison.mismatchedDayCount %}all_days_match{% endif %}" id="reconcile_days">
+        <thead>
+            <tr>
+                <td rowspan="2">Date</td>
+                <td colspan="2" class="text-center">Statement</td>
+                <td colspan="2" class="text-center">Tracker</td>
+                <td rowspan="2" class="num">Net difference</td>
+                <td rowspan="2"></td>
+            </tr>
+            <tr>
+                <td class="num">Charges</td>
+                <td class="num">Credits</td>
+                <td class="num">Charges</td>
+                <td class="num">Credits</td>
+            </tr>
+        </thead>
+        {% for day in comparison.days %}
+        <tbody class="{% if day.matches %}matching_day{% endif %}">
+            <tr class="rec_day_row {% if day.matches %}rec_match{% else %}rec_mismatch{% endif %}" data-toggle="collapse" data-target="#rec_day_{{forloop.counter}}" aria-expanded="false" aria-controls="rec_day_{{forloop.counter}}">
+                <td>{{day.date|date:"m/d/Y"}}</td>
+                <td class="num">{% if day.statement.debits %}{{day.statement.debits|money}}{% endif %}</td>
+                <td class="num">{% if day.statement.credits %}{{day.statement.credits|money}}{% endif %}</td>
+                <td class="num">{% if day.tracker.debits %}{{day.tracker.debits|money}}{% endif %}</td>
+                <td class="num">{% if day.tracker.credits %}{{day.tracker.credits|money}}{% endif %}</td>
+                <td class="num rec_diff">{% if day.matches %}<i class="bi bi-check-lg"></i>{% else %}{{day.netDifference|signed_money}}{% endif %}</td>
+                <td><a href="/viewTx/?date_filter_start={{day.date|date:'Y-m-d'}}&date_filter_end={{day.date|date:'Y-m-d'}}" target="_blank" title="Open this day in View Transactions">View</a></td>
+            </tr>
+        </tbody>
+        <tbody class="collapse {% if day.matches %}matching_day{% endif %}" id="rec_day_{{forloop.counter}}">
+            <tr class="rec_detail_row">
+                <td colspan="7">
+                    <div class="rec_detail">
+                        <div>
+                            <h6>Statement ({{day.statement.count}})</h6>
+                            <table>
+                                {% for row in day.statementRows %}
+                                <tr>
+                                    <td>{{row.description}}</td>
+                                    <td class="num {% if row.type == 'credit' %}rec_credit{% endif %}">{{row.amount|money}} {{row.type}}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td class="rec_muted">Nothing on the statement for this day.</td></tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                        <div>
+                            <h6>Tracker ({{day.tracker.count}})</h6>
+                            <table>
+                                {% for row in day.trackerRows %}
+                                <tr>
+                                    <td>{{row.description}}</td>
+                                    <td class="rec_muted">{{row.category|default:""}}</td>
+                                    {% if not selectedAccount %}<td class="rec_muted">{{row.account|default:""}}</td>{% endif %}
+                                    <td class="num {% if row.type == 'credit' %}rec_credit{% endif %}">{{row.amount|money}} {{row.type}}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td class="rec_muted">No tracker transactions on this day.</td></tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+        {% endfor %}
+    </table>
+
+    {% elif trackerTotals %}
+    <div class="reconcile_result_header">
+        <h4>Tracker totals</h4>
+        <span>{{selectedAccount.name|default:"All accounts"}} &middot; {{startDate}} to {{endDate}}</span>
+    </div>
+    <p class="reconcile_notes">Upload the statement CSV to compare these against it.</p>
+    <table class="reconcile_table reconcile_summary">
+        <tbody>
+            <tr><td>Charges (debits)</td><td class="num">{{trackerTotals.debits|money}}</td></tr>
+            <tr><td>Payments &amp; credits</td><td class="num">{{trackerTotals.credits|money}}</td></tr>
+            <tr><td>Net (charges - credits)</td><td class="num">{{trackerTotals.net|money}}</td></tr>
+            <tr><td>Transactions</td><td class="num">{{trackerTotals.count}}</td></tr>
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+<script>
+    $(function () {
+        $('#show_matching_days').on('change', function () {
+            $('#reconcile_days').toggleClass('show_matching', this.checked);
+        });
+    });
+</script>
+{% endblock %}

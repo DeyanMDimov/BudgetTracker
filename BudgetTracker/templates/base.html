@@ -21,6 +21,7 @@
                     <li id="menu-item-import-tx" class="menu-item"><a href="/importData" class="btn btn-link btn-outline-dark" role="button">Add Stuff</a></li>
                     <li id="menu-item-view-tx" class="menu-item"><a href="/viewTx" class="btn btn-link btn-outline-dark" role="button">View Transactions</a></li>
                     <li id="menu-item-view-summary" class="menu-item"><a href="/viewSummary" class="btn btn-link btn-outline-dark" role="button">View Summary</a></li>
+                    <li id="menu-item-reconcile" class="menu-item"><a href="/reconcile" class="btn btn-link btn-outline-dark" role="button">Reconcile</a></li>
                     <li id="menu-item-view-plaid" class="menu-item"><a href="/plaid" class="btn btn-link btn-outline-dark" role="button">Pull Transactions</a></li>
                     {% comment %} <li id="menu-item-view-equalPay" class="menu-item"><a href="/equalPay" class="btn btn-link btn-outline-dark" role="button">Set Equal Pay</a></li> {% endcomment %}
                     {% comment %} <li id="menu-item-cleanse" class="menu-item"><a href="/cleanse" class="btn btn-link btn-outline-dark" role="button">Cleanse</a></li> {% endcomment %}
@@ -39,6 +40,9 @@
             {% endblock %}
 
             {% block pullPlaid %}
+            {% endblock %}
+
+            {% block reconcile %}
             {% endblock %}
         </div>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>

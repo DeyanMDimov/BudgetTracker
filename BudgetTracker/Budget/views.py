@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from Budget.models import category, theme, account, transaction, travelTrip, equalPaySplit
-from Budget import importLogic
+from Budget import importLogic, reconcileLogic
 from django.forms.models import model_to_dict
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -330,6 +330,101 @@ def viewSummary(request):
 
     #return render(request, 'viewSummary.html', {'existingThemes': theme.objects.all().order_by('name'), 'themeTotals': themeTotals})
     return render(request, 'viewSummary.html', {'existingThemes': themeTotals, 'existingCategories': existingCategories, 'categoryThemePairs': categoryThemePairs, 'yearSelected': yearToDisplay})
+
+def reconcile(request):
+    accounts = account.objects.all().order_by('name')
+    context = {'accounts': accounts, 'selectedAccountId': '', 'startDate': '', 'endDate': ''}
+    if request.method != 'POST':
+        return render(request, 'reconcile.html', context)
+
+    accountId = request.POST.get('account', '')
+    startDateStr = request.POST.get('start_date', '').strip()
+    endDateStr = request.POST.get('end_date', '').strip()
+    statementFile = request.FILES.get('statement_file')
+    context.update({'selectedAccountId': accountId, 'startDate': startDateStr, 'endDate': endDateStr})
+    errors = []
+    notes = []
+
+    selectedAccount = None
+    if accountId:
+        try:
+            selectedAccount = account.objects.get(pk = accountId)
+        except (account.DoesNotExist, ValueError):
+            errors.append("That account no longer exists.")
+
+    startDate = endDate = None
+    try:
+        startDate = datetime.strptime(startDateStr, '%Y-%m-%d').date() if startDateStr else None
+        endDate = datetime.strptime(endDateStr, '%Y-%m-%d').date() if endDateStr else None
+    except ValueError:
+        errors.append("Dates must be in YYYY-MM-DD format.")
+
+    statement = None
+    if statementFile:
+        try:
+            statement = reconcileLogic.parseStatementCSV(reconcileLogic.decodeUpload(statementFile.read()))
+        except reconcileLogic.StatementParseError as e:
+            errors.append("Couldn't read " + statementFile.name + ": " + str(e))
+
+    if statement and not errors:
+        if not statement['hasAccountColumn'] and selectedAccount is None:
+            errors.append("This statement doesn't say which account it's for. Pick the account it belongs to, "
+                          "otherwise transactions from every other account would be counted too.")
+        elif statement['hasAccountColumn'] and selectedAccount is not None:
+            matchingRows = [r for r in statement['rows']
+                            if reconcileLogic.statementRowMatchesAccount(r['account'], selectedAccount)]
+            otherAccountCount = len(statement['rows']) - len(matchingRows)
+            if otherAccountCount:
+                notes.append(str(otherAccountCount) + " statement row(s) for other accounts were ignored.")
+            statement['rows'] = matchingRows
+
+    if not errors:
+        if statement and statement['rows'] and (startDate is None or endDate is None):
+            statementDates = [r['date'] for r in statement['rows']]
+            startDate = startDate or min(statementDates)
+            endDate = endDate or max(statementDates)
+            notes.append("Date range taken from the first and last transactions in the statement.")
+        elif statement and not statement['rows']:
+            errors.append("The statement has no transactions for " + selectedAccount.name + ".")
+        elif startDate is None or endDate is None:
+            errors.append("Pick a start and end date, or upload a statement CSV to use its date range.")
+
+    if not errors and startDate > endDate:
+        errors.append("The start date is after the end date.")
+
+    if errors:
+        context['errors'] = errors
+        return render(request, 'reconcile.html', context)
+
+    txs = transaction.objects.filter(date__gte = startDate, date__lte = endDate) \
+        .select_related('account', 'category').order_by('date', 'transactionId')
+    if selectedAccount is not None:
+        txs = txs.filter(account = selectedAccount)
+    trackerRows = reconcileLogic.trackerRows(txs)
+
+    context.update({
+        'startDate': startDate.isoformat(),
+        'endDate': endDate.isoformat(),
+        'selectedAccount': selectedAccount,
+        'notes': notes,
+    })
+
+    if statement:
+        statementRows = [r for r in statement['rows'] if startDate <= r['date'] <= endDate]
+        outsideRangeCount = len(statement['rows']) - len(statementRows)
+        if outsideRangeCount:
+            notes.append(str(outsideRangeCount) + " statement row(s) dated outside the selected range were ignored.")
+        context.update({
+            'statementFileName': statementFile.name,
+            'statementFormat': statement['formatDescription'],
+            'skippedCount': statement['skippedCount'],
+            'skippedExamples': statement['skippedExamples'],
+            'comparison': reconcileLogic.compare(statementRows, trackerRows),
+        })
+    else:
+        context['trackerTotals'] = reconcileLogic.summarize(trackerRows)
+
+    return render(request, 'reconcile.html', context)
 
 def equalPay(request):
     defaultStartDate = datetime.now() + timedelta(-1500)
